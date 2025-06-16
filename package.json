@@ -1,0 +1,31 @@
+{
+  "name": "hyper.files.organizer",
+  "version": "1.0.0",
+  "description": "Organizes the files in a folder using an Electron UI.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "keywords": [
+    "organizer",
+    "electron",
+    "files",
+    "material"
+  ],
+  "author": "Subham",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^36.4.0",
+    "electron-builder": "^26.0.12"
+  },
+  "dependencies": {
+    "@material/web": "^2.3.0",
+    "nodemailer": "^7.0.3"
+  },
+  "build": {
+    "appId": "hyper.files.organizer",
+    "productName": "Simple File Organizer",
+    "icon": "icon.png"
+  }
+}

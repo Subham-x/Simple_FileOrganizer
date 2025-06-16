@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Smart File Organizer UI</title>
+    <script type="module" src="https://esm.run/@material/web/all.js"></script>
+    <link rel="stylesheet" href="src/styles.css">
+</head>
+
+<body>
+    <div class="top-controls">
+        <h2>Simple File Organizer</h2>
+        <div class="actionBtn">
+            <md-filled-tonal-button id="theme-toggle">
+                <md-icon slot="icon"><span id="ico">format_paint</span></md-icon>
+                Toggle Theme
+            </md-filled-tonal-button>
+            <a href="src/pages/feedback.html"><md-outlined-button>Feedback</md-outlined-button></a>
+            <a href="src/pages/about.html"><md-text-button>About</md-text-button></a>
+
+            
+        </div>
+    </div>
+
+    <div class="layout">
+        <!-- Left Card -->
+        <md-elevated-card class="card left-card">
+            <div class="destAction">
+                <div class="dest">
+                    <h4>Select Destination</h4>
+                    <input type="hidden" id="folder-picker" class="hidden-input" webkitdirectory />
+                    <md-outlined-button id="folder-btn">Choose Destination Folder</md-outlined-button>
+                </div>
+                <div class="pathDisplay">No Destination Choosen</div>
+            </div>
+
+
+            <div class="excpCard">
+                <!-- Exception List -->
+                <h4>Add exception extension.</h4>
+                <p id="exception">Write exception without dot(.), <b>E.g: pdf or txt </b>
+                </p>
+                <div class="exception-list" id="exception-list">
+                    <md-outlined-text-field label="E.g: js"></md-outlined-text-field>
+                </div>
+
+                <!-- Add Exception Button -->
+                <div class="fabBtn">
+                    <md-fab id="add-exception-btn" label="Add Exception">
+                        <md-icon slot="icon"><img src="src/icons/add.svg"></md-icon>
+                    </md-fab>
+                </div>
+            </div>
+
+
+            <!-- Submit Button -->
+            <div style="margin-top: 2rem;" class="start">
+                <md-filled-button id="start-btn">Start Organize</md-filled-button>
+            </div>
+        </md-elevated-card>
+
+        <!-- Right Card (Terminal) -->
+        <md-elevated-card class="card right-card">
+            <div class="tab-section">
+                <h3>Status</h3>
+            </div>
+            <div class="terminal-box" id="terminal">
+                $ simple.organize >> app_started <succ>(successfully)</succ>
+            </div>
+        </md-elevated-card>
+    </div>
+
+    <script>
+        const addBtn = document.getElementById('add-exception-btn');
+        const exceptionList = document.getElementById('exception-list');
+        const folderBtn = document.getElementById('folder-btn');
+        const startBtn = document.getElementById('start-btn');
+        const terminal = document.getElementById('terminal');
+        const pathDisplay = document.querySelector('.pathDisplay');
+        let actualFolderPath = "";
+
+        // Add exception field
+        addBtn.addEventListener('click', () => {
+            const newField = document.createElement('md-outlined-text-field');
+            newField.setAttribute('label', 'e.g: pdf');
+            exceptionList.appendChild(newField);
+        });
+
+        // Folder selection via Electron
+        folderBtn.addEventListener('click', async () => {
+            const selectedPath = await window.electronAPI.chooseFolder();
+            if (selectedPath) {
+                actualFolderPath = selectedPath;
+                terminal.innerHTML += `<br> $ <warn>📁 Folder selected: ${actualFolderPath} </warn>`;
+                pathDisplay.textContent = actualFolderPath;
+            }
+        });
+
+        // Start organizing
+        startBtn.addEventListener('click', async () => {
+            if (!actualFolderPath) {
+                terminal.innerHTML += "<br> $ <err>⚠️ Please select a destination folder first.</err>";
+                return;
+            }
+
+            const exceptionFields = exceptionList.querySelectorAll('md-outlined-text-field');
+            const exceptions = Array.from(exceptionFields).map(f => f.value.trim()).filter(Boolean);
+
+            const result = await window.electronAPI.startOrganize(actualFolderPath, exceptions);
+            terminal.innerHTML += "<br> $ <succ>" + result + "</succ>";
+        });
+
+
+        // ---- Theme Toggler
+
+        const toggleBtn = document.getElementById('theme-toggle');
+        const icon = toggleBtn.querySelector('md-icon');
+
+        toggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+            const isDark = document.body.classList.contains('dark');
+            // icon.textContent = isDark ? 'light_mode' : 'dark_mode'; // optional
+        });
+
+
+
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        if (prefersDark) {
+            // document.write("Demokoskosodskd");
+            document.body.classList.toggle('dark');
+            // terminal.textContent = "$ darkModeTurned_ON";
+            // terminal.textContent += "\n$ darkModeTurned_ON";
+            terminal.innerHTML += "<br>$ <info>darkModeTurned_ON </info>";
+
+        } else {
+            console.log('User prefers light mode');
+            terminal.innerHTML += "$ <info>light_mode detected</info>";
+        }
+
+    </script>
+
+
+</body>
+
+</html>
